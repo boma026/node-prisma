@@ -7,10 +7,34 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+// Definindo o enum 'Role' com dois valores possíveis
+enum Role {
+  USER  
+  ADMIN 
+}
+
 
 model User {
-  id Int @id @default(autoincrement())
-  status Boolean @default(true)
-  name String
-  email String @unique
+  id        Int      @id @default(autoincrement())  // Identificador único para cada usuário, gerado automaticamente
+  status    Boolean  @default(true)  // Status do usuário, com valor padrão 'true' (ativo)
+  createdAt DateTime @default(now())  // Data e hora de criação do usuário, gerada automaticamente
+  updatedAt DateTime @updatedAt  // Data e hora da última atualização, gerada automaticamente
+  role      Role     @default(USER)  // Papel do usuário, com valor padrão 'USER'
+  name      String   // Nome do usuário
+  email     String   @unique  // E-mail do usuário, que deve ser único na tabela
+  posts     Post[]   // Relacionamento com a tabela de posts, onde um usuário pode ter muitos posts
+
+  @@map("users")  // Mapeia o nome da tabela no banco de dados para "users"
+}
+
+// Modelo de post
+model Post {
+  id        Int      @id @default(autoincrement())  // Identificador único para cada post, gerado automaticamente
+  title     String   // Título do post
+  subtitle  String?  // Subtítulo do post (opcional)
+  body      String   // Corpo do post (conteúdo principal)
+  userId    Int      // ID do usuário que criou o post (chave estrangeira)
+  author    User     @relation(fields: [userId], references: [id])  // Relacionamento com o modelo 'User' (autor do post)
+
+  @@map("posts")  // Mapeia o nome da tabela no banco de dados para "posts"
 }
