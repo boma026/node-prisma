@@ -17,3 +17,32 @@ export const createUsers = async (users: Prisma.UserCreateInput[]) => {
     skipDuplicates: true
     })
 }
+
+export const getAllUsers = async () => {
+    const users = prisma.user.findMany({
+        where: {
+            name: {
+                startsWith: "j"
+            }
+        },
+        
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            status: true
+        }
+    });
+    return users;
+}
+
+export const getUserByEmail = async (email: string) => {
+    const user = await prisma.user.findUnique({
+        where: { email },
+        select: {
+            name: true,
+            id: true
+        }
+    })
+    return user;
+}
