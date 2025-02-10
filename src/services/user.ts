@@ -19,20 +19,63 @@ export const createUsers = async (users: Prisma.UserCreateInput[]) => {
 }
 
 export const getAllUsers = async () => {
-    const users = prisma.user.findMany({
+    let page = 1;
+    const users = await prisma.user.findMany({
+        skip: (page - 1) * 2,
+        take: 2,
+
         where: {
             name: {
                 startsWith: "j"
-            }
+            },
+
+            posts: {
+                some: {
+                    title: {
+                        startsWith: "titulo"
+                    }
+                }
+            },
+        
+            OR: [
+                {
+                    email: {
+                        endsWith: "@hotmail.com"
+                    }
+                },
+                {
+                    email: {
+                        endsWith: "gmail.com"
+                    }
+                }
+            ]
         },
         
         select: {
             id: true,
             name: true,
             email: true,
-            status: true
-        }
+            status: true,
+            posts: {
+                select: {
+                    id: true,
+                    title: true
+                }
+            },
+            _count: {
+                select: {
+                    posts: true
+                }
+            }
+        },
+
+        orderBy: [
+            {name: "asc"},
+            {email: "asc"}
+        ]
     });
+
+   
     return users;
 }
 
@@ -45,4 +88,16 @@ export const getUserByEmail = async (email: string) => {
         }
     })
     return user;
+}
+
+export const updateUser = async () => {
+    const updateUser = await prisma.user.update({
+        where: {
+            email: "suporte@b7web.com.br"
+        },
+        data: {
+            role: "ADMIN"
+        }
+    });
+    return updateUser;
 }

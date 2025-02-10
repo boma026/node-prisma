@@ -14,8 +14,8 @@ mainRouter.get('/', (req, res) => {
 
 mainRouter.post("/user", async (req, res) => {
     const user = await createUser({
-        name:"arthur2",
-        email:"gabrielfixe@hotmail2.com",
+        name:"jarthur2",
+        email:"gabrielfixe8@hotmail.com",
         posts: {
             create: {
                 title: "titulo de teste",
