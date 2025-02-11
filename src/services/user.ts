@@ -4,11 +4,19 @@ import { Prisma } from "@prisma/client"
 
 
 export const createUser = async (data: Prisma.UserCreateInput ) => {
-    try{
-        return await prisma.user.create({ data });
-    } catch (error){
-        return false;
-    }
+   const result = await prisma.user.upsert({
+    where: {
+        email: data.email
+    },
+    update: {
+        role: "ADMIN"
+    },
+
+    create: data
+
+   });
+
+   return result;
 }
 
 export const createUsers = async (users: Prisma.UserCreateInput[]) => {
@@ -93,11 +101,33 @@ export const getUserByEmail = async (email: string) => {
 export const updateUser = async () => {
     const updateUser = await prisma.user.update({
         where: {
-            email: "suporte@b7web.com.br"
+            email: "gabrielfixe8@hotmail.com"
         },
         data: {
             role: "ADMIN"
         }
     });
     return updateUser;
+}
+
+export const updateUsers = async () => {
+    const updateUser = await prisma.user.updateMany({
+        where: {
+            email: {
+                endsWith: "@hotmail.com"
+            }
+        },
+        data: {
+            status: false
+        }
+    });
+    return updateUser;
+}
+
+export const deleteUser = async () => {
+    const deleteUser = await prisma.user.delete({
+        where: {
+            email: "gabrielfixe@hotmail.com"
+        }
+    })
 }
