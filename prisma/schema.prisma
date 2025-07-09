@@ -1,40 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-// Definindo o enum 'Role' com dois valores possíveis
+
+// Enumeração que define os possíveis "papéis" (roles) de um usuário.
+// Enums são úteis para restringir os valores permitidos para um campo no banco de dados.
+// Neste caso, um usuário pode ser apenas "USER" ou "ADMIN".
 enum Role {
-  USER  
-  ADMIN 
+  USER
+  ADMIN
 }
 
+// Modelo que representa a entidade "User" no banco de dados.
+// Este model faz parte da camada "Model" no padrão MVC.
+model User { // cria a tabela chamada user
+  // Campo "id": chave primária do tipo inteiro. (chave primaria é um identificador único de cada registro (linha) dentro de uma tabela em um banco de dados relacional)
+  // O valor é gerado automaticamente e incrementado a cada novo registro.
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique // A anotação @unique garante que o e-mail não se repita entre diferentes usuários.
 
-model User {
-  id        Int      @id @default(autoincrement())  // Identificador único para cada usuário, gerado automaticamente
-  status    Boolean  @default(true)  // Status do usuário, com valor padrão 'true' (ativo)
-  createdAt DateTime @default(now())  // Data e hora de criação do usuário, gerada automaticamente
-  updatedAt DateTime @updatedAt  // Data e hora da última atualização, gerada automaticamente
-  role      Role     @default(USER)  // Papel do usuário, com valor padrão 'USER'
-  name      String   // Nome do usuário
-  email     String   @unique  // E-mail do usuário, que deve ser único na tabela
-  posts     Post[]   // Relacionamento com a tabela de posts, onde um usuário pode ter muitos posts
+  // Campo "role": define o papel do usuário com base no enum "Role".
+  // Só é possível inserir os valores definidos no enum (USER ou ADMIN).
+  // O valor padrão é USER, caso nenhum valor seja fornecido na criação.
+  role      Role      @default(USER)
 
-  @@map("users")  // Mapeia o nome da tabela no banco de dados para "users"
+  createdAt DateTime  @default(now()) // funçao que salva a hora que o usuario foi criado 
+  updatedAt DateTime  @updatedAt //Propriedade especial que automaticamente ja salva assim que o usuario for modificado
+  post      Post[]
 }
 
-// Modelo de post
 model Post {
-  id        Int      @id @default(autoincrement())  // Identificador único para cada post, gerado automaticamente
-  title     String   // Título do post
-  subtitle  String?  // Subtítulo do post (opcional)
-  body      String   // Corpo do post (conteúdo principal)
-  userId    Int      // ID do usuário que criou o post (chave estrangeira)
-  author    User     @relation(fields: [userId], references: [id])  // Relacionamento com o modelo 'User' (autor do post)
+  id        Int     @id @default(autoincrement())
+  title     String
+  body      String
+  subTitle  String?  @map("sub_Title")//no prisma todos ja começam com obrigatorio, colocando a interrogaçao ele vira opcional
+  userId    Int
+  author    User    @relation(fields: [userId], references: [id] ) // Author User = Em termos práticos: cada post pertence a um autor (usuário).
 
-  @@map("posts")  // Mapeia o nome da tabela no banco de dados para "posts"
+  /*Essa anotação define como essa relação será mapeada no banco:
+
+fields: [userId]:
+Diz que o campo userId (presente neste modelo) será a chave estrangeira (foreign key) que aponta para o autor do post.
+
+references: [id]:
+Diz que esse userId referencia o campo id do modelo User.
+
+💡 Em resumo:
+Essa linha cria uma relação de muitos-para-um:
+
+Muitos Posts → pertencem a um único User (autor).
+
+Cada post tem um campo userId que aponta para o id do usuário autor.*/
+
 }
